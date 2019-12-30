@@ -18,7 +18,7 @@ def load_driver():
 
 
 def makepack(list_fn='./appid.txt'):
-	sleep_time= 0.5
+    sleep_time= 0.5
     driver = load_driver()
     if not os.path.isfile(list_fn):
         print ('%s is not existed'%list_fn)
@@ -52,9 +52,11 @@ def makepack(list_fn='./appid.txt'):
         radio_name = 'booster_tradability_preference_%s_%s'
         #Click Nottradable first 
         try : 
-        	driver.find_element_by_id(radio_name%('nottradable',appid)).click()
-        	#If tradable make tradable card pack
-        	driver.find_element_by_id(radio_name%('tradable',appid)).click()
+            driver.find_element_by_id(radio_name%('nottradable',appid)).click()
+            #If tradable make tradable card pack
+            driver.find_element_by_id(radio_name%('tradable',appid)).click()
+        except:
+            pass
         sleep(sleep_time)
         driver.find_element_by_class_name("btn_makepack").click()
         sleep(sleep_time)
