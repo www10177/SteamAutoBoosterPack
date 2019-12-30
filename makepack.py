@@ -51,9 +51,11 @@ def makepack(list_fn='./appid.txt'):
                 skip_flag = True
         radio_name = 'booster_tradability_preference_%s_%s'
         #Click Nottradable first 
-        driver.find_element_by_id(radio_name%('nottradable',appid)).click()
-        #If tradable make tradable card pack
-        driver.find_element_by_id(radio_name%('tradable',appid)).click()
+        try : 
+        	driver.find_element_by_id(radio_name%('nottradable',appid)).click()
+        	#If tradable make tradable card pack
+        	driver.find_element_by_id(radio_name%('tradable',appid)).click()
+        sleep(sleep_time)
         driver.find_element_by_class_name("btn_makepack").click()
         sleep(sleep_time)
         driver.find_element_by_class_name("newmodal_buttons").find_element_by_class_name("btn_green_white_innerfade").click()
