@@ -6,5 +6,9 @@ Easy automate browser to make boostercard
  - Selenium webdriver that match your chrome version 
  - python3 
 
-## Install.bat 
-just an easy packed bat  to install python requirements  
+## How to use 
+#### Installation 
+`pip3 install -r requirements.txt  `
+#### Run Applications
+- `python makepack.py`
+- `python GemCalculator.py`
