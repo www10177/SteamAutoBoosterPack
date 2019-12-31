@@ -13,7 +13,7 @@ Install Chrome and put Correspond  `Chromedirver` in same folder
 #### Run Applications
 - `python makepack.py` : Auto craft booster pack based on `appid.txt`
 - `python GemCalculator.py` : Calculate all gem you need based on `appid.txt`
-- `python3 DailyReport.py` : Calculate your daily profit if you craft all booster pack in `appid.txt`  
+- `python DailyReport.py` : Calculate your daily profit if you craft all booster pack in `appid.txt`  
 
 #### Appid.txt 
 Key one steam appid in each line.  
