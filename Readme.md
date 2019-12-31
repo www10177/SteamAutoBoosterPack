@@ -19,6 +19,7 @@ Install Chrome and put Correspond  `Chromedirver` in same folder
 Key one steam appid in each line.  
 You can also add game name or comments after appid, seperate by one space .
 example :  
+
     883710 Biohazzard 2
     960170 DJMAX RESPECT V
     385800 
