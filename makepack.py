@@ -9,6 +9,8 @@ def load_driver():
     #prefs = {"profile.managed_default_content_settings.images": 2}
     #options.add_experimental_option("prefs", prefs)
     options.add_argument("user-data-dir=selenium")
+    prefs = {"profile.managed_default_content_settings.images": 0}
+    options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=options)
     driver.get('https://steamcommunity.com/tradingcards/boostercreator')
     print('='*50)

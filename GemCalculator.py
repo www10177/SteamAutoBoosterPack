@@ -38,6 +38,7 @@ def get_price(list_fn='appid.txt'):
     print('total gem count : %d '%gem_count)
     f.write('total gem count : %d '%gem_count)
     f.close()
+    input('All data save in gem_count.txt, Press Enter to close')
 
 
 if __name__ =='__main__':
