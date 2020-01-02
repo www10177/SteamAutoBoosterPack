@@ -13,9 +13,7 @@ def load_driver():
     options.add_extension('./extensions/Better-Buy-Orders_v1.6.2.crx')
     options.add_extension('./extensions/Augmented Steam1.3.crx')
     options.add_argument("user-data-dir=selenium")
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--ignore-ssl-errors')
-    prefs = {"profile.managed_default_content_settings.images": 2}
+    prefs = {"profile.managed_default_content_settings.images": 0}
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(chrome_options=options)
     driver.get('https://steamcommunity.com')
@@ -24,44 +22,43 @@ def load_driver():
     return driver
 
 def get_price_tuple(link,driver):
-    page_try_count = 0 
-    while True : 
-        driver.get(link)
-        try :
-            select = Select(driver.find_element_by_id('currency_buyorder'))
-            break
-        except Exception as e :
-            print(e)
-            print('Cannot Get Steam Store Page, Try Again...')
-            sleep(3)
-        page_try_count +=1 
-        if page_try_count > 5 : 
-            print('try %s more than 5 times, force exit'%link)
-            return ((-99,-99),(-99,-99))
+    driver.get(link)
+    try :
+        select = Select(driver.find_element_by_id('currency_buyorder'))	
+    except Exception as e :
+        print(e)
+        print('Cannot Get Steam Store Page, Try Again...')
+        return ((-99,-99),(-99,-99))
 
     select = Select(driver.find_element_by_id('currency_buyorder'))
     select.select_by_value('30')
     sell_ele = driver.find_element_by_id('market_commodity_forsale')
     buy_ele = driver.find_element_by_id('market_commodity_buyrequests')
-    while True:
-        if 'NT' in buy_ele.text:
-            break
-    #print(sell_ele.text)
-    #print(buy_ele.text)
     reg = r'(\d*).*NT\$ (\d*.\d*) .*'
-    sell_re = re.search(reg,sell_ele.text).groups()
-    buy_re = re.search(reg,buy_ele.text).groups()
-    return (sell_re,buy_re)
+    try_count = 0
+    while 'NT' not in sell_ele.text and 'NT' not in buy_ele.text:
+    	try :
+    		sleep(0.2)
+    	except: 
+    		try_count +=1
+    	if try_count >50:
+    		print('break from NT check')
+    		break
+    sell_re = re.search(reg,sell_ele.text)
+    buy_re = re.search(reg,buy_ele.text)
+    sell_group = sell_re.groups() if sell_re is not None else  (-99,-99)
+    buy_group  = buy_re.groups() if buy_re is not None else (-99,-99)
+    return (sell_group,buy_group)
 def get_sell_vol(driver):
     sleep_time=0.5
     #Try 3 times to make sure sold_amount appear
-    for i in range(10):
+    for i in range(1):
         try :
             div = driver.find_element_by_class_name('es_sold_amount')
             amount = div.find_element_by_css_selector('span').text
             return int(amount.replace(',',''))
         except Exception as e:
-            #print(e)
+            print(e)
             sleep(sleep_time)
     return -99
 
@@ -147,7 +144,7 @@ def results():
 
 if __name__ == '__main__':
     tax_rate = 0.85
-    with open ('appid.txt','r') as f :
+    with open ('../Daily_appid.txt','r') as f :
         appid_l = [i.strip().split(' ')[0] for i in f.readlines()]
     df_allcard = pd.DataFrame(columns = ['card_name','link','24hr_sell_vol','sell_price(before tax)',
         'sell_price(after tax)','sell_amount','buy_price','buy_amount'])
@@ -157,23 +154,27 @@ if __name__ == '__main__':
     driver = load_driver()
     gem_price = get_gem_price(driver)
     for appid in tqdm(appid_l):
-        info_dict= get_info(appid,driver)
-        price_list = info_dict['price_list']
-        price_list = [i for i in price_list if i['sell_price'] > 0]
-        game_name = info_dict['game_name']
-        game_link = 'https://www.steamcardexchange.net/index.php?gamepage-appid-%s'%appid
-        card_avg = tax_rate*cal_avg(price_list) ## Cal price after tax
-        gem_count = get_gem_count(len(price_list))
-        for priced in price_list:
-            #Each Card
-            df_allcard = df_allcard.append(pd.DataFrame([{'card_name':priced['name'],
-                'link':priced['link'],'24hr_sell_vol':priced['24hr_sell_vol'],'sell_price(before tax)':priced['sell_price'],
-            'sell_price(after tax)':priced['sell_price']*tax_rate,'sell_amount':priced['sell_vol'],
-            'buy_price':priced['buy_price'],'buy_amount':priced['buy_vol']}]))
-        game_dict = {'game_name':game_name,'link':game_link,'gem_price':gem_price,'required_gem_amount':gem_count,
-        'gem_cost':gem_price*gem_count/1000,'avg_card_price(after_tax)':card_avg,
-        'avg_pack_income':card_avg*3,'avg_pack_revenue':card_avg*3-gem_price*gem_count/1000}
-        df_game = df_game.append(pd.DataFrame([game_dict]))
+        try :
+            info_dict= get_info(appid,driver)
+            price_list = info_dict['price_list']
+            price_list = [i for i in price_list if i['sell_price'] > 0]
+            game_name = info_dict['game_name']
+            game_link = 'https://www.steamcardexchange.net/index.php?gamepage-appid-%s'%appid
+            card_avg = tax_rate*cal_avg(price_list) ## Cal price after tax
+            gem_count = get_gem_count(len(price_list))
+            for priced in price_list:
+                #Each Card
+                df_allcard = df_allcard.append(pd.DataFrame([{'card_name':priced['name'],
+                    'link':priced['link'],'24hr_sell_vol':priced['24hr_sell_vol'],'sell_price(before tax)':priced['sell_price'],
+                'sell_price(after tax)':priced['sell_price']*tax_rate,'sell_amount':priced['sell_vol'],
+                'buy_price':priced['buy_price'],'buy_amount':priced['buy_vol']}]))
+            game_dict = {'game_name':game_name,'link':game_link,'gem_price':gem_price,'required_gem_amount':gem_count,
+            'gem_cost':gem_price*gem_count/1000,'avg_card_price(after_tax)':card_avg,
+            'avg_pack_income':card_avg*3,'avg_pack_revenue':card_avg*3-gem_price*gem_count/1000}
+            df_game = df_game.append(pd.DataFrame([game_dict]))
+        except Exception as e:
+            print(e)
+            print(appid)
     writer = pd.ExcelWriter('DailyReport.xlsx', engine='xlsxwriter')
     df_game.to_excel(writer,sheet_name='Game_report',index=False)
     df_allcard.to_excel(writer,sheet_name='Card_report',index=False)

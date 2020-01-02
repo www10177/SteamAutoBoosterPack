@@ -5,3 +5,4 @@ fake_useragent
 urllib3
 xlsxwriter
 pandas
+requests

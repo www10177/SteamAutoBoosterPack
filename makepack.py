@@ -52,6 +52,9 @@ def makepack(list_fn='./appid.txt'):
             if skip_text.strip().lower() == 'y':
                 skip_flag = True
         radio_name = 'booster_tradability_preference_%s_%s'
+        #Sleep Check
+        if skip_flag:
+        	sleep(sleep_time)
         #Click Nottradable first 
         try : 
             driver.find_element_by_id(radio_name%('nottradable',appid)).click()
