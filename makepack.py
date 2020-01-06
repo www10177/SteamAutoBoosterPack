@@ -5,11 +5,12 @@ from time import sleep
 
 def load_driver():
     options = webdriver.ChromeOptions()
-    #options.add_extension('./extensions/Better-Buy-Orders_v1.6.2.crx')
+    options.add_extension('./extensions/Better-Buy-Orders_v1.6.2.crx')
     #prefs = {"profile.managed_default_content_settings.images": 2}
     #options.add_experimental_option("prefs", prefs)
-    options.add_argument("user-data-dir=selenium")
-    prefs = {"profile.managed_default_content_settings.images": 0}
+    user_data_dir = os.path.join(os.getenv('APPDATA'),'SteamAutoBoosterPack')
+    options.add_argument("user-data-dir=%s"%user_data_dir)
+    prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=options)
     driver.get('https://steamcommunity.com/tradingcards/boostercreator')

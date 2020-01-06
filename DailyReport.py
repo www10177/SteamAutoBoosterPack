@@ -8,11 +8,13 @@ from time import sleep
 import pandas as pd 
 from tqdm import tqdm
 from sys import argv
+import os 
 def load_driver():
     options = webdriver.ChromeOptions()
     options.add_extension('./extensions/Better-Buy-Orders_v1.6.2.crx')
     options.add_extension('./extensions/Augmented Steam1.3.crx')
-    options.add_argument("user-data-dir=selenium")
+    user_data_dir = os.path.join(os.getenv('APPDATA'),'SteamAutoBoosterPack')
+    options.add_argument("user-data-dir=%s"%user_data_dir)
     prefs = {"profile.managed_default_content_settings.images": 0}
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(chrome_options=options)
@@ -148,7 +150,7 @@ if __name__ == '__main__':
         appid_l = [i.strip().split(' ')[0] for i in f.readlines()]
     df_allcard = pd.DataFrame(columns = ['card_name','link','24hr_sell_vol','sell_price(before tax)',
         'sell_price(after tax)','sell_amount','buy_price','buy_amount'])
-    df_game = pd.DataFrame(columns = ['game_name','link','gem_price','required_gem_amount','gem_cost','avg_card_price(after_tax)',
+    df_game = pd.DataFrame(columns = ['game_name','link','gem_price','required_gem_amount','gem_cost','avg_card_cost','avg_card_price(after_tax)',
         'avg_pack_income','avg_pack_revenue'])
     
     driver = load_driver()
@@ -169,7 +171,7 @@ if __name__ == '__main__':
                 'sell_price(after tax)':priced['sell_price']*tax_rate,'sell_amount':priced['sell_vol'],
                 'buy_price':priced['buy_price'],'buy_amount':priced['buy_vol']}]))
             game_dict = {'game_name':game_name,'link':game_link,'gem_price':gem_price,'required_gem_amount':gem_count,
-            'gem_cost':gem_price*gem_count/1000,'avg_card_price(after_tax)':card_avg,
+            'gem_cost':gem_price*gem_count/1000,'avg_card_cost':gem_price*gem_count/1000 /3,'avg_card_price(after_tax)':card_avg,
             'avg_pack_income':card_avg*3,'avg_pack_revenue':card_avg*3-gem_price*gem_count/1000}
             df_game = df_game.append(pd.DataFrame([game_dict]))
         except Exception as e:
